@@ -1,20 +1,15 @@
-name: Reusable Terraform Pipeline
+name: Terraform Pipeline
 
 on:
-  workflow_call:
-    inputs:
-      working_directory:
-        required: false
-        type: string
-        default: "."
-      terraform_version:
-        required: false
-        type: string
-        default: "1.15.2"
+  workflow_dispatch:
 
 jobs:
   terraform:
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./azurerm_resource_group
 
     steps:
       - name: Checkout Repository
@@ -23,7 +18,7 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: ${{ inputs.terraform_version }}
+          terraform_version: "1.15.2"
 
       - name: Azure Login
         uses: azure/login@v2
@@ -37,17 +32,13 @@ jobs:
             }
 
       - name: Terraform Init
-        working-directory: ${{ inputs.working_directory }}
         run: terraform init
 
       - name: Terraform Validate
-        working-directory: ${{ inputs.working_directory }}
         run: terraform validate
 
       - name: Terraform Plan
-        working-directory: ${{ inputs.working_directory }}
         run: terraform plan
 
       - name: Terraform Apply
-        working-directory: ${{ inputs.working_directory }}
         run: terraform apply -auto-approve
